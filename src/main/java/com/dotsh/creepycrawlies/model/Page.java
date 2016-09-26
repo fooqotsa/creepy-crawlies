@@ -1,13 +1,12 @@
 package com.dotsh.creepycrawlies.model;
 
-import java.util.BitSet;
-import java.util.List;
 import java.util.Set;
 
 public class Page {
     private String title;
     private String url;
     private Set<String> internalUrls;
+    private Set<String> externalUrls;
 
     public void setTitle(String title) {
         this.title = title;
@@ -31,5 +30,13 @@ public class Page {
 
     public void setInternalUrls(Set<String> internalUrls) {
         this.internalUrls = internalUrls;
+    }
+
+    public Set<String> getExternalUrls() {
+        return externalUrls;
+    }
+
+    public void setExternalUrls(Set<String> externalUrls) {
+        this.externalUrls = externalUrls;
     }
 }

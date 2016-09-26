@@ -7,6 +7,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,21 +24,34 @@ public class Crawler {
         throwIfUrlIsNullOrEmpty(url);
         List<Page> pages = new ArrayList<>();
         Document doc = retrieveDocument(url);
-        pages.add(buildPageFromDocument(doc, url));
+        String host = deriveHost(url);
+        pages.add(buildPageFromDocument(doc, host));
         return pages;
+    }
+
+    private String deriveHost(String url) throws MalformedURLException {
+        return new HostDeriver().parse(url);
     }
 
     private Page buildPageFromDocument(Document doc, String url) {
         Page page = new Page();
         page.setTitle(doc.title());
         page.setUrl(doc.location());
-        page.setInternalUrls(parseInternalUrls(doc, url));
+        Elements hrefElements = getAllElementsWithHrefs(doc);
+        page.setInternalUrls(parseInternalUrls(hrefElements, url));
+        page.setExternalUrls(parseExternalUrls(hrefElements, url));
         return page;
     }
 
-    private Set<String> parseInternalUrls(Document doc, String url) {
+    private Set<String> parseInternalUrls(Elements hrefElements, String url) {
         Set<String> urls = new HashSet<>();
-        retrieveInternalUrlsFromLinkElements(url, urls, getAllElementsWithHrefs(doc));
+        retrieveInternalUrlsFromLinkElements(url, urls, hrefElements);
+        return urls;
+    }
+
+    private Set<String> parseExternalUrls(Elements hrefElements, String url) {
+        Set<String> urls = new HashSet<>();
+        retrieveExternalUrlsFromLinkElements(url, urls, hrefElements);
         return urls;
     }
 
@@ -55,10 +71,29 @@ public class Crawler {
         }
     }
 
-    private void addHrefToSetIfInternalUrl(String url, Set<String> urls, String href) {
-        if (href != null && href.toLowerCase().startsWith(url.toLowerCase())) {
+    private void retrieveExternalUrlsFromLinkElements(String url, Set<String> urls, Elements linkElements) {
+        for (Element element : linkElements) {
+            Attributes attributes = element.attributes();
+            if (attributes != null) {
+                addHrefToSetIfExternalUrl(url, urls, attributes.get(HREF_ATTRIBUTE));
+            }
+        }
+    }
+
+    private void addHrefToSetIfExternalUrl(String url, Set<String> urls, String href) {
+        if (href != null && !isOnSameDomain(url, href)) {
             urls.add(href);
         }
+    }
+
+    private void addHrefToSetIfInternalUrl(String url, Set<String> urls, String href) {
+        if (href != null && isOnSameDomain(url, href)) {
+            urls.add(href);
+        }
+    }
+
+    private boolean isOnSameDomain(String url, String href) {
+        return href.toLowerCase().contains(url.toLowerCase());
     }
 
     protected Document retrieveDocument (String url) {

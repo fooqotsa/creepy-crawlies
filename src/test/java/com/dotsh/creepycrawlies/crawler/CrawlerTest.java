@@ -1,6 +1,7 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -185,6 +186,32 @@ public class CrawlerTest {
     }
 
     @Test
+    public void addsOneFromSubDomain() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+                elements.add(1, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get(HREF_ATTRIBUTE)).thenReturn("http://www.subdomain.wiprodigital.com");
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(1, pages.get(0).getInternalUrls().size());
+    }
+
+    @Test
     public void onlyAddsMultipleDifferentUrls() throws IOException {
         class TestCrawler extends Crawler {
             @Override
@@ -212,6 +239,31 @@ public class CrawlerTest {
         TestCrawler crawler = new TestCrawler();
         List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
         assertEquals(2, pages.get(0).getInternalUrls().size());
+    }
+
+    @Test
+    public void addsExternalUrlsToPage() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("href")).thenReturn("http://google.com");
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(1, pages.get(0).getExternalUrls().size());
     }
 
     @Test
