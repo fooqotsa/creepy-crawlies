@@ -1,7 +1,6 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,6 +10,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 
+import static com.dotsh.creepycrawlies.parser.PageParser.HREF_ATTRIBUTE;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
