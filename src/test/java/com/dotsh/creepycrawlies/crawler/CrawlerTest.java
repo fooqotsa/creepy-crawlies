@@ -1,20 +1,42 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 public class CrawlerTest {
+
+    public static final String WIPRO_HOMEPAGE = "http://wiprodigital.com";
 
     @Test
     public void crawlerRetrievesAListOfPagesFromSpecifiedWebsite() throws IOException {
         Crawler crawler = new Crawler();
-        List<Page> pages = crawler.connect("http://wiprodigital.com");
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
         assertNotNull(pages);
+    }
+
+    @Test
+    public void retrievesTitleFromDocumentAndAddsItToPage() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument (String url) {
+                Document document = Mockito.mock(Document.class);
+                when(document.title()).thenReturn("title");
+                return document;
+            }
+        }
+
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals("title", pages.get(0).getTitle());
     }
 
     @Test(expected = IllegalArgumentException.class)
