@@ -1,6 +1,7 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -37,6 +38,22 @@ public class CrawlerTest {
         TestCrawler crawler = new TestCrawler();
         List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
         assertEquals("title", pages.get(0).getTitle());
+    }
+
+    @Test
+    public void retrievesUrlOfCurrentPageAndAddsItToPageObject() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument (String url) {
+                Document document = Mockito.mock(Document.class);
+                when(document.location()).thenReturn(WIPRO_HOMEPAGE);
+                return document;
+            }
+        }
+
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(WIPRO_HOMEPAGE, pages.get(0).getUrl());
     }
 
     @Test(expected = IllegalArgumentException.class)

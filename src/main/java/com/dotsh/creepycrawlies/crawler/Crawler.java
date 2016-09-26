@@ -15,6 +15,7 @@ public class Crawler {
         Document doc = retrieveDocument(url);
         Page page = new Page();
         page.setTitle(doc.title());
+        page.setUrl(doc.location());
         pages.add(page);
         return pages;
     }
