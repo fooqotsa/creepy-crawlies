@@ -83,6 +83,160 @@ public class CrawlerTest {
         assertTrue(pages.get(0).getInternalUrls().contains("http://wiprodigital.com/who-we-are"));
     }
 
+    @Test
+    public void doesNotAddToListOfInternalUrlsIfUrlIsNotAtSameDomain() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("href")).thenReturn("http://externalSite.com");
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertTrue(pages.get(0).getInternalUrls().isEmpty());
+    }
+
+    @Test
+    public void doesNotAddToListOfInternalUrlsIfUrlIsNull() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("href")).thenReturn(null);
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertTrue(pages.get(0).getInternalUrls().isEmpty());
+    }
+
+    @Test
+    public void doesNotAddToListOfInternalUrlsIfUrlIsEmpty() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("href")).thenReturn("");
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertTrue(pages.get(0).getInternalUrls().isEmpty());
+    }
+
+    @Test
+    public void onlyAddsOneOfTheSameUrl() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+                elements.add(1, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get(HREF_ATTRIBUTE)).thenReturn(WIPRO_HOMEPAGE);
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(1, pages.get(0).getInternalUrls().size());
+    }
+
+    @Test
+    public void onlyAddsMultipleDifferentUrls() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Element navElement2 = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                Attributes attributes2 = mock(Attributes.class);
+                elements.add(0, navElement);
+                elements.add(1, navElement2);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get(HREF_ATTRIBUTE)).thenReturn(WIPRO_HOMEPAGE);
+                when(attributes2.get(HREF_ATTRIBUTE)).thenReturn(WIPRO_HOMEPAGE + "/other");
+                when(navElement.attributes()).thenReturn(attributes);
+                when(navElement2.attributes()).thenReturn(attributes2);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(2, pages.get(0).getInternalUrls().size());
+    }
+
+    @Test
+    public void doesNotAttemptToAddUrlsToPageIfAttributesIsNull() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(navElement.attributes()).thenReturn(null);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(0, pages.get(0).getInternalUrls().size());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void crawlerThrowsAnIllegalArgumentExceptionIfUrlIsNull() throws IOException {
         new Crawler().connect(null);
