@@ -1,5 +1,6 @@
 package com.dotsh.creepycrawlies.model;
 
+import java.util.Dictionary;
 import java.util.Set;
 
 public class Page {
@@ -7,6 +8,7 @@ public class Page {
     private String url;
     private Set<String> internalUrls;
     private Set<String> externalUrls;
+    private Set<String> staticContent;
 
     public void setTitle(String title) {
         this.title = title;
@@ -38,5 +40,13 @@ public class Page {
 
     public void setExternalUrls(Set<String> externalUrls) {
         this.externalUrls = externalUrls;
+    }
+
+    public Set<String> getStaticContent() {
+        return staticContent;
+    }
+
+    public void setStaticContent(Set<String> staticContent) {
+        this.staticContent = staticContent;
     }
 }

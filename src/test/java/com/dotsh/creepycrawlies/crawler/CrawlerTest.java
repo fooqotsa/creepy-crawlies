@@ -1,6 +1,7 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.when;
 public class CrawlerTest {
 
     public static final String WIPRO_HOMEPAGE = "http://wiprodigital.com";
+    public static final String STATIC_CONTENT_SAMPLE = "http://17776-presscdn-0-6.pagely.netdna-cdn.com/wp-content/themes/wiprodigital/images/wdlogo.png";
 
     @Test
     public void crawlerRetrievesAListOfPagesFromSpecifiedWebsite() throws IOException {
@@ -267,6 +269,106 @@ public class CrawlerTest {
     }
 
     @Test
+    public void doesNotAddHashLinksToExternalUrls() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("href")).thenReturn("#pageFocus");
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(0, pages.get(0).getExternalUrls().size());
+    }
+
+    @Test
+    public void addsStaticContentToPage() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("src")).thenReturn(STATIC_CONTENT_SAMPLE);
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(1, pages.get(0).getStaticContent().size());
+    }
+
+    @Test
+    public void doesNotAddStaticContentIfNull() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("src")).thenReturn(null);
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(0, pages.get(0).getStaticContent().size());
+    }
+
+    @Test
+    public void doesNotAddStaticContentIfEmpty() throws IOException {
+        class TestCrawler extends Crawler {
+            @Override
+            protected Document retrieveDocument(String url) {
+                Document document = mock(Document.class);
+                Element topLevelElement = mock(Element.class);
+                Element navElement = mock(Element.class);
+                Elements elements = new Elements();
+                Attributes attributes = mock(Attributes.class);
+                elements.add(0, navElement);
+
+                when(document.body()).thenReturn(topLevelElement);
+                when(topLevelElement.select(anyString())).thenReturn(elements);
+                when(attributes.get("src")).thenReturn("");
+                when(navElement.attributes()).thenReturn(attributes);
+
+                return document;
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
+        assertEquals(0, pages.get(0).getStaticContent().size());
+    }
+
+    @Test
     public void doesNotAttemptToAddUrlsToPageIfAttributesIsNull() throws IOException {
         class TestCrawler extends Crawler {
             @Override
@@ -288,7 +390,7 @@ public class CrawlerTest {
         List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
         assertEquals(0, pages.get(0).getInternalUrls().size());
     }
-
+    
     @Test(expected = IllegalArgumentException.class)
     public void crawlerThrowsAnIllegalArgumentExceptionIfUrlIsNull() throws IOException {
         new Crawler().connect(null);

@@ -13,15 +13,19 @@ public class PageParser {
 
     public static final String HREF_SELECTOR = "a[href]";
     public static final String HREF_ATTRIBUTE = "href";
-
+    public static final String STATIC_CONTENT_SELECTOR = "[src]";
+    public static final String SRC_ATTRIBUTE = "src";
+    public static final String SAME_PAGE_ANCHOR_PREFIX = "#";
 
     public Page buildFromDocument(Document doc, String url) {
         Page page = new Page();
         page.setTitle(doc.title());
         page.setUrl(doc.location());
         Elements hrefElements = getAllElementsWithHrefs(doc);
+        Elements staticContentElements = getAllElementsWithStaticContent(doc);
         page.setInternalUrls(parseInternalUrls(hrefElements, url));
         page.setExternalUrls(parseExternalUrls(hrefElements, url));
+        page.setStaticContent(parseStaticContent(staticContentElements));
         return page;
     }
 
@@ -37,9 +41,23 @@ public class PageParser {
         return urls;
     }
 
+    private Set<String> parseStaticContent(Elements staticContentElements) {
+        Set<String> urls = new HashSet<>();
+        retrieveStaticContentFromElements(staticContentElements, urls);
+        return urls;
+    }
+
     private Elements getAllElementsWithHrefs(Document doc) {
+        return queryDocument(doc, HREF_SELECTOR);
+    }
+
+    private Elements getAllElementsWithStaticContent(Document doc) {
+        return queryDocument(doc, STATIC_CONTENT_SELECTOR);
+    }
+
+    private Elements queryDocument(Document doc, String selector) {
         if (doc.body() != null) {
-            return doc.body().select(HREF_SELECTOR);
+            return doc.body().select(selector);
         }
         return new Elements();
     }
@@ -47,7 +65,7 @@ public class PageParser {
 
     private void retrieveInternalUrlsFromLinkElements(String url, Set<String> urls, Elements linkElements) {
         for (Element element : linkElements) {
-            Attributes attributes = element.attributes();
+            final Attributes attributes = element.attributes();
             if (attributes != null) {
                 addHrefToSetIfInternalUrl(url, urls, attributes.get(HREF_ATTRIBUTE));
             }
@@ -56,17 +74,36 @@ public class PageParser {
 
     private void retrieveExternalUrlsFromLinkElements(String url, Set<String> urls, Elements linkElements) {
         for (Element element : linkElements) {
-            Attributes attributes = element.attributes();
+            final Attributes attributes = element.attributes();
             if (attributes != null) {
                 addHrefToSetIfExternalUrl(url, urls, attributes.get(HREF_ATTRIBUTE));
             }
         }
     }
 
+    private void retrieveStaticContentFromElements(Elements staticContentElements, Set<String> urls) {
+        for (Element staticContentElement : staticContentElements) {
+            final Attributes attributes = staticContentElement.attributes();
+            if (attributes != null) {
+                addStaticContentToSet(urls, attributes.get(SRC_ATTRIBUTE));
+            }
+        }
+    }
+
+    private void addStaticContentToSet(Set<String> urls, String src) {
+        if (src != null && !src.isEmpty()) {
+            urls.add(src);
+        }
+    }
+
     private void addHrefToSetIfExternalUrl(String url, Set<String> urls, String href) {
-        if (href != null && !isOnSameDomain(url, href)) {
+        if (href != null && !isOnSameDomain(url, href) && !isASamePageAnchor(href)) {
             urls.add(href);
         }
+    }
+
+    private boolean isASamePageAnchor(String href) {
+        return href.startsWith(SAME_PAGE_ANCHOR_PREFIX);
     }
 
     private void addHrefToSetIfInternalUrl(String url, Set<String> urls, String href) {
