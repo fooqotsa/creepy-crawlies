@@ -1,7 +1,6 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -390,7 +389,7 @@ public class CrawlerTest {
         List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
         assertEquals(0, pages.get(0).getInternalUrls().size());
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void crawlerThrowsAnIllegalArgumentExceptionIfUrlIsNull() throws IOException {
         new Crawler().connect(null);
