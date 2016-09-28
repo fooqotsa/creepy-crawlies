@@ -19,7 +19,7 @@ public class Crawler {
         return buildPages(doc, host);
     }
 
-    private List<Page> buildPages(Document doc, String host) {
+    private List<Page> buildPages(Document doc, String host) throws IOException {
         List<Page> pages = new ArrayList<>();
         pages.add(new PageParser().buildFromDocument(doc, host));
         return pages;
