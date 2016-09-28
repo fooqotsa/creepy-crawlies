@@ -16,6 +16,10 @@ public class PageParser {
     public static final String STATIC_CONTENT_SELECTOR = "[src]";
     public static final String SRC_ATTRIBUTE = "src";
     public static final String SAME_PAGE_ANCHOR_PREFIX = "#";
+    public static final String HASH_QUERY_STRING = "#";
+    public static final int URL_FIRST_SECTION = 0;
+    public static final String QUESTION_MARK_SPLITTER = "\\?";
+    public static final String QUESTION_MARK_QUERY_STRING = "?";
 
     public Page buildFromDocument(Document doc, String url) {
         Page page = new Page();
@@ -67,7 +71,7 @@ public class PageParser {
         for (Element element : linkElements) {
             final Attributes attributes = element.attributes();
             if (attributes != null) {
-                addHrefToSetIfInternalUrl(url, urls, attributes.get(HREF_ATTRIBUTE));
+                addHrefToSetIfInternalUrl(url, urls, stripUrlIfQueryParametersArePresent(attributes.get(HREF_ATTRIBUTE)));
             }
         }
     }
@@ -76,9 +80,21 @@ public class PageParser {
         for (Element element : linkElements) {
             final Attributes attributes = element.attributes();
             if (attributes != null) {
-                addHrefToSetIfExternalUrl(url, urls, attributes.get(HREF_ATTRIBUTE));
+                addHrefToSetIfExternalUrl(url, urls, stripUrlIfQueryParametersArePresent(attributes.get(HREF_ATTRIBUTE)));
             }
         }
+    }
+
+    private String stripUrlIfQueryParametersArePresent(String href) {
+        if (href != null) {
+            if (href.contains(HASH_QUERY_STRING)) {
+                href = href.split(HASH_QUERY_STRING)[URL_FIRST_SECTION];
+            }
+            if (href.contains(QUESTION_MARK_QUERY_STRING)) {
+                href = href.split(QUESTION_MARK_SPLITTER)[URL_FIRST_SECTION];
+            }
+        }
+        return href;
     }
 
     private void retrieveStaticContentFromElements(Elements staticContentElements, Set<String> urls) {
@@ -97,19 +113,19 @@ public class PageParser {
     }
 
     private void addHrefToSetIfExternalUrl(String url, Set<String> urls, String href) {
-        if (href != null && !isOnSameDomain(url, href) && !isASamePageAnchor(href)) {
+        if (href != null && !href.isEmpty() && !isOnSameDomain(url, href) && !isASamePageAnchor(href)) {
+            urls.add(href);
+        }
+    }
+
+    private void addHrefToSetIfInternalUrl(String url, Set<String> urls, String href) {
+        if (href != null && !href.isEmpty() && isOnSameDomain(url, href)) {
             urls.add(href);
         }
     }
 
     private boolean isASamePageAnchor(String href) {
         return href.startsWith(SAME_PAGE_ANCHOR_PREFIX);
-    }
-
-    private void addHrefToSetIfInternalUrl(String url, Set<String> urls, String href) {
-        if (href != null && isOnSameDomain(url, href)) {
-            urls.add(href);
-        }
     }
 
     private boolean isOnSameDomain(String url, String href) {
