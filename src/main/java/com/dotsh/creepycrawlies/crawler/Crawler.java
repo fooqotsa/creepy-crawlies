@@ -13,7 +13,6 @@ import java.util.List;
 public class Crawler {
 
     public List<Page> connect(String url) throws IOException {
-        throwIfUrlIsNullOrEmpty(url);
         Document doc = retrieveDocument(url);
         String host = deriveHost(url);
         return buildPages(doc, host);
@@ -33,9 +32,4 @@ public class Crawler {
         return Jsoup.connect(url).get();
     }
 
-    private void throwIfUrlIsNullOrEmpty(String url) {
-        if (url == null || url.isEmpty()) {
-            throw new IllegalArgumentException("Url must not be null");
-        }
-    }
 }
