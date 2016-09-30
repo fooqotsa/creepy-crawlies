@@ -32,7 +32,7 @@ public class Crawler {
 
     protected Queue<String> initialiseQueue(Page page) {
         Queue<String> queue = new LinkedList<>();
-        queue.add("internalUrl");
+        queue.addAll(page.getInternalUrls());
         return queue;
     }
 
