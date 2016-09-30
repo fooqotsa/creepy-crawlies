@@ -2,6 +2,7 @@ package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
 import org.jsoup.nodes.Document;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class CrawlerTest {
         assertEquals(WIPRO_HOMEPAGE, pages.get(0).getUrl());
     }
 
-    @Test
+    @Ignore
     public void test() throws IOException {
         new Crawler().connect(WIPRO_HOMEPAGE);
     }
