@@ -1,20 +1,15 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
-import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,19 +49,14 @@ public class CrawlInitialiserTest {
         assertEquals(WIPRO_HOMEPAGE, pages.get(0).getUrl());
     }
 
+    @Test
+    public void returnsEmptyListIfInitialDocumentIsNull() throws IOException {
+        assertTrue(new CrawlInitialiser().connect("url").isEmpty());
+    }
+
     @Ignore
     public void test() throws IOException {
         new CrawlInitialiser().connect(WIPRO_HOMEPAGE);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void crawlerThrowsAnIllegalArgumentExceptionIfUrlIsNull() throws IOException {
-        new CrawlInitialiser().connect(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void crawlerThrowsAnIllegalArgumentExceptionIfUrlIsEmpty() throws IOException {
-        new CrawlInitialiser().connect("");
     }
 
 }

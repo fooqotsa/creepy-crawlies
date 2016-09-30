@@ -46,7 +46,7 @@ public class CrawlerTest {
     }
 
     @Test
-    public void crawlerDoesNotAddsInternalUrlsIfPageInternalUrlsIsEmpty() {
+    public void crawlerDoesNotAddInternalUrlsIfPageInternalUrlsIsEmpty() {
         class TestCrawler extends Crawler {
             public Queue<String> getInitialiseQueue(Page page) {
                 return initialiseQueue(page);
@@ -60,4 +60,7 @@ public class CrawlerTest {
         assertEquals(0, queue.size());
     }
 
+
+//    @Test
+//    public void crawler
 }

@@ -2,22 +2,19 @@ package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
 import com.dotsh.creepycrawlies.parser.PageParser;
-import org.jsoup.Jsoup;
+import com.dotsh.creepycrawlies.retriever.DocumentRetriever;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 public class CrawlInitialiser {
 
     public List<Page> connect(String url) throws IOException {
         Document doc = retrieveDocument(url);
-        String host = deriveHost(url);
-        return buildPages(doc, host);
+        return doc != null ? buildPages(doc, deriveHost(url)) : new ArrayList<>();
     }
 
     private List<Page> buildPages(Document doc, String host) throws IOException {
@@ -31,7 +28,7 @@ public class CrawlInitialiser {
     }
 
     protected Document retrieveDocument (String url) throws IOException {
-        return Jsoup.connect(url).get();
+        return new DocumentRetriever().retrieve(url);
     }
 
 }
