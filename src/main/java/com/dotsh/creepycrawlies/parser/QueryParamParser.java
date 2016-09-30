@@ -6,11 +6,13 @@ public class QueryParamParser {
     public static final int URL_FIRST_SECTION = 0;
     public static final String QUESTION_MARK_SPLITTER = "\\?";
     public static final String QUESTION_MARK_QUERY_STRING = "?";
+    public static final String FORWARD_SLASH = "/";
 
     public String stripUrlIfQueryParametersArePresent(String href) {
         if (href != null) {
             href = stripOutHash(href);
             href = stripOutQuestionMark(href);
+            href = stripOutLeadingSlash(href);
         }
         return href;
     }
@@ -29,4 +31,15 @@ public class QueryParamParser {
         return href;
     }
 
+    private String stripOutLeadingSlash(String href) {
+        return hasTrailingForwardSlash(href) ? removeEndCharacter(href) : href;
+    }
+
+    private String removeEndCharacter(String href) {
+        return href.substring(0, href.length() - 1);
+    }
+
+    private boolean hasTrailingForwardSlash(String href) {
+        return href.endsWith(FORWARD_SLASH);
+    }
 }

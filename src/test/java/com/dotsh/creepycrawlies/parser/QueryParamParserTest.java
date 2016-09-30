@@ -45,4 +45,19 @@ public class QueryParamParserTest {
         String expectedResult = "http://wiprodigital.com/what-we-do";
         assertEquals(expectedResult, paramParser.stripUrlIfQueryParametersArePresent(urlWithHashAndQuestionMark));
     }
+
+    @Test
+    public void removesLeadingSlashIfUrlContainsSlashAtFrontOfUrl() {
+        String urlWithLeadingSlash = "http://google.com/";
+        String expectedResult = "http://google.com";
+
+        assertEquals(expectedResult, paramParser.stripUrlIfQueryParametersArePresent(urlWithLeadingSlash));
+    }
+
+    @Test
+    public void maintainsUrlIfNoLeadingSlash() {
+        String expectedResult = "http://google.com";
+
+        assertEquals(expectedResult, paramParser.stripUrlIfQueryParametersArePresent(expectedResult));
+    }
 }
