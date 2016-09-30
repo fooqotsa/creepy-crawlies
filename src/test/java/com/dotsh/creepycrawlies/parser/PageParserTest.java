@@ -22,7 +22,6 @@ public class PageParserTest {
     public static final String HOST_URL = "wiprodigital.com";
     public static final String STATIC_CONTENT_SAMPLE = "http://17776-presscdn-0-6.pagely.netdna-cdn.com/wp-content/themes/wiprodigital/images/wdlogo.png";
 
-
     @Test
     public void retrievesAListOfInternalUrlsOnCurrentPageAndAddsThemToPageObject() throws IOException {
         Document document = mock(Document.class);
@@ -43,26 +42,7 @@ public class PageParserTest {
     }
 
     @Test
-    public void doesNotAddToListOfInternalUrlsIfUrlIsNotAtSameDomain() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        elements.add(0, navElement);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("href")).thenReturn("http://externalSite.com");
-        when(navElement.attributes()).thenReturn(attributes);
-
-        PageParser parser = new PageParser();
-
-        assertTrue(parser.buildFromDocument(document, HOST_URL).getInternalUrls().isEmpty());
-    }
-
-    @Test
-    public void addsExternalUrlFromSubDomain() throws IOException {
+    public void addsInternalUrlFromSubDomain() throws IOException {
         Document document = mock(Document.class);
         Element topLevelElement = mock(Element.class);
         Element navElement = mock(Element.class);
@@ -77,28 +57,6 @@ public class PageParserTest {
         when(navElement.attributes()).thenReturn(attributes);
 
         assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
-    }
-
-    @Test
-    public void onlyAddsMultipleDifferentUrls() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Element navElement2 = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        Attributes attributes2 = mock(Attributes.class);
-        elements.add(0, navElement);
-        elements.add(1, navElement2);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get(HREF_ATTRIBUTE)).thenReturn(WIPRO_HOMEPAGE);
-        when(attributes2.get(HREF_ATTRIBUTE)).thenReturn(WIPRO_HOMEPAGE + "/other");
-        when(navElement.attributes()).thenReturn(attributes);
-        when(navElement2.attributes()).thenReturn(attributes2);
-
-        assertEquals(2, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
     }
 
     @Test
@@ -119,23 +77,6 @@ public class PageParserTest {
     }
 
     @Test
-    public void doesNotAddHashLinksToExternalUrls() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        elements.add(0, navElement);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("href")).thenReturn("#pageFocus");
-        when(navElement.attributes()).thenReturn(attributes);
-
-        assertEquals(0, new PageParser().buildFromDocument(document, HOST_URL).getExternalUrls().size());
-    }
-
-    @Test
     public void addsStaticContentToPage() throws IOException {
         Document document = mock(Document.class);
         Element topLevelElement = mock(Element.class);
@@ -153,40 +94,6 @@ public class PageParserTest {
     }
 
     @Test
-    public void doesNotAddStaticContentIfNull() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        elements.add(0, navElement);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("src")).thenReturn(null);
-        when(navElement.attributes()).thenReturn(attributes);
-
-        assertEquals(0, new PageParser().buildFromDocument(document, HOST_URL).getStaticContent().size());
-    }
-
-    @Test
-    public void doesNotAddStaticContentIfEmpty() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        elements.add(0, navElement);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("src")).thenReturn("");
-        when(navElement.attributes()).thenReturn(attributes);
-
-        assertEquals(0, new PageParser().buildFromDocument(document, HOST_URL).getStaticContent().size());
-    }
-
-    @Test
     public void doesNotAttemptToAddUrlsToPageIfAttributesIsNull() throws IOException {
         Document document = mock(Document.class);
         Element topLevelElement = mock(Element.class);
@@ -199,23 +106,6 @@ public class PageParserTest {
         when(navElement.attributes()).thenReturn(null);
 
         assertEquals(0, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
-    }
-
-    @Test
-    public void doesNotAddToListOfInternalUrlsIfUrlIsEmpty() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        elements.add(0, navElement);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("href")).thenReturn("");
-        when(navElement.attributes()).thenReturn(attributes);
-
-        assertTrue(new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().isEmpty());
     }
 
     @Test
