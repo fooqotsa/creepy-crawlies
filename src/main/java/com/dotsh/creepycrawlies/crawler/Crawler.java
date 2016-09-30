@@ -2,7 +2,9 @@ package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
 import com.dotsh.creepycrawlies.retriever.DocumentRetriever;
+import org.jsoup.nodes.Document;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,12 +12,15 @@ import java.util.Queue;
 
 public class Crawler {
 
-    public List<Page> crawl(Page initialPage) {
+    private DocumentRetriever documentRetriever;
+
+    public List<Page> crawl(Page initialPage) throws IOException {
         Queue<String> queue = initialiseQueue(initialPage);
         List<Page> pages = new ArrayList<>();
         pages.add(initialPage);
         while (!queue.isEmpty()) {
-            queue.remove();
+            String href = queue.remove();
+            Document document = documentRetriever.retrieve(href);
             pages.add(parsePage());
         }
         return pages;
@@ -31,4 +36,7 @@ public class Crawler {
         return queue;
     }
 
+    public void setDocumentRetriever(DocumentRetriever documentRetriever) {
+        this.documentRetriever = documentRetriever;
+    }
 }

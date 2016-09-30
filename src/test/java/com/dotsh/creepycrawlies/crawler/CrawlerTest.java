@@ -2,7 +2,10 @@ package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
 import com.dotsh.creepycrawlies.retriever.DocumentRetriever;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,9 +14,9 @@ import java.util.List;
 import java.util.Queue;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class CrawlerTest {
 
@@ -79,4 +82,18 @@ public class CrawlerTest {
         assertEquals(2, pages.size());
     }
 
+    @Test
+    public void retrievesDocumentForPageParsingForEachUrl() throws IOException {
+        Crawler crawler = new Crawler();
+        Document document = mock(Document.class);
+        DocumentRetriever retriever = mock(DocumentRetriever.class);
+        crawler.setDocumentRetriever(retriever);
+        when(retriever.retrieve(any())).thenReturn(document);
+        Page initialPage = new Page();
+        HashSet<String> internalUrls = new HashSet<>();
+        internalUrls.add("wiprodigital.com/stuff");
+        initialPage.setInternalUrls(internalUrls);
+        crawler.crawl(initialPage);
+        verify(retriever, times(1)).retrieve("wiprodigital.com/stuff");
+    }
 }
