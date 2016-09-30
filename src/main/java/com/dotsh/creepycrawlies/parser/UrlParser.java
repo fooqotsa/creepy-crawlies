@@ -65,13 +65,13 @@ public class UrlParser {
 
     private void addHrefToSetIfExternalUrl(String url, Set<String> urls, String href) {
         if (href != null && !href.isEmpty() && !isOnSameDomain(url, href) && !isASamePageAnchor(href)) {
-            urls.add(href);
+            urls.add(href.trim());
         }
     }
 
     private void addHrefToSetIfInternalUrl(String url, Set<String> urls, String href) {
         if (href != null && !href.isEmpty() && isOnSameDomain(url, href)) {
-            urls.add(href);
+            urls.add(href.trim());
         }
     }
 

@@ -209,5 +209,63 @@ public class UrlParserTest {
         assertEquals(0, urls.size());
     }
 
+    @Test
+    public void trimsInternalUrlIfUrlHasLeadingWhitespace() {
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
 
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn(" " + HOST_URL);
+        when(navElement.attributes()).thenReturn(attributes);
+        Set<String> urls = parser.retrieveInternalUrlsFromLinkElements(HOST_URL, elements);
+        assertEquals(HOST_URL, urls.iterator().next());
+    }
+
+    @Test
+    public void trimsInternalUrlIfUrlHasEndingWhitespace() {
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
+
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn(HOST_URL + " ");
+        when(navElement.attributes()).thenReturn(attributes);
+        Set<String> urls = parser.retrieveInternalUrlsFromLinkElements(HOST_URL, elements);
+        assertEquals(HOST_URL, urls.iterator().next());
+    }
+
+    @Test
+    public void trimsExternalUrlIfUrlHasLeadingWhitespace() {
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
+
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn(" http://www.google.com");
+        when(navElement.attributes()).thenReturn(attributes);
+        Set<String> urls = parser.retrieveExternalUrlsFromLinkElements(HOST_URL, elements);
+        assertEquals("http://www.google.com", urls.iterator().next());
+    }
+
+    @Test
+    public void trimsExternalUrlIfUrlHasEndingWhitespace() {
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
+
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://www.google.com ");
+        when(navElement.attributes()).thenReturn(attributes);
+        Set<String> urls = parser.retrieveExternalUrlsFromLinkElements(HOST_URL, elements);
+        assertEquals("http://www.google.com", urls.iterator().next());
+    }
 }
