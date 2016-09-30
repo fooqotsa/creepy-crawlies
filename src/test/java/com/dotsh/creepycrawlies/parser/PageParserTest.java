@@ -1,6 +1,5 @@
 package com.dotsh.creepycrawlies.parser;
 
-import com.dotsh.creepycrawlies.crawler.Crawler;
 import com.dotsh.creepycrawlies.model.Page;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
@@ -9,7 +8,6 @@ import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
 
 import static com.dotsh.creepycrawlies.parser.PageParser.HREF_ATTRIBUTE;
 import static org.junit.Assert.assertEquals;
@@ -204,28 +202,6 @@ public class PageParserTest {
     }
 
     @Test
-    public void doesNotAddQueryStringedUrlsTwice() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Element navElement2 = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        Attributes attributes2 = mock(Attributes.class);
-        elements.add(0, navElement);
-        elements.add(1, navElement2);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("href")).thenReturn("http://wiprodigital.com/what-we-do#work-three-circles-row");
-        when(attributes2.get("href")).thenReturn("http://wiprodigital.com/what-we-do");
-        when(navElement.attributes()).thenReturn(attributes);
-        when(navElement2.attributes()).thenReturn(attributes2);
-
-        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
-    }
-
-    @Test
     public void doesNotAddQueryStringedUrlsWithQuestionMarkTwice() throws IOException {
         Document document = mock(Document.class);
         Element topLevelElement = mock(Element.class);
@@ -249,79 +225,186 @@ public class PageParserTest {
 
     @Test
     public void doesNotAddToListOfInternalUrlsIfUrlIsNull() throws IOException {
-        class TestCrawler extends Crawler {
-            @Override
-            protected Document retrieveDocument(String url) {
-                Document document = mock(Document.class);
-                Element topLevelElement = mock(Element.class);
-                Element navElement = mock(Element.class);
-                Elements elements = new Elements();
-                Attributes attributes = mock(Attributes.class);
-                elements.add(0, navElement);
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
 
-                when(document.body()).thenReturn(topLevelElement);
-                when(topLevelElement.select(anyString())).thenReturn(elements);
-                when(attributes.get("href")).thenReturn(null);
-                when(navElement.attributes()).thenReturn(attributes);
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn(null);
+        when(navElement.attributes()).thenReturn(attributes);
 
-                return document;
-            }
-        }
-        TestCrawler crawler = new TestCrawler();
-        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
-        assertTrue(pages.get(0).getInternalUrls().isEmpty());
+        assertTrue(new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().isEmpty());
     }
 
     @Test
     public void doesNotAddToListOfInternalUrlsIfUrlIsEmpty() throws IOException {
-        class TestCrawler extends Crawler {
-            @Override
-            protected Document retrieveDocument(String url) {
-                Document document = mock(Document.class);
-                Element topLevelElement = mock(Element.class);
-                Element navElement = mock(Element.class);
-                Elements elements = new Elements();
-                Attributes attributes = mock(Attributes.class);
-                elements.add(0, navElement);
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
 
-                when(document.body()).thenReturn(topLevelElement);
-                when(topLevelElement.select(anyString())).thenReturn(elements);
-                when(attributes.get("href")).thenReturn("");
-                when(navElement.attributes()).thenReturn(attributes);
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("");
+        when(navElement.attributes()).thenReturn(attributes);
 
-                return document;
-            }
-        }
-        TestCrawler crawler = new TestCrawler();
-        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
-        assertTrue(pages.get(0).getInternalUrls().isEmpty());
+        assertTrue(new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().isEmpty());
     }
 
     @Test
     public void onlyAddsOneOfTheSameUrl() throws IOException {
-        class TestCrawler extends Crawler {
-            @Override
-            protected Document retrieveDocument(String url) {
-                Document document = mock(Document.class);
-                Element topLevelElement = mock(Element.class);
-                Element navElement = mock(Element.class);
-                Elements elements = new Elements();
-                Attributes attributes = mock(Attributes.class);
-                elements.add(0, navElement);
-                elements.add(1, navElement);
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement);
 
-                when(document.body()).thenReturn(topLevelElement);
-                when(topLevelElement.select(anyString())).thenReturn(elements);
-                when(attributes.get(HREF_ATTRIBUTE)).thenReturn(WIPRO_HOMEPAGE);
-                when(navElement.attributes()).thenReturn(attributes);
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get(HREF_ATTRIBUTE)).thenReturn(WIPRO_HOMEPAGE);
+        when(navElement.attributes()).thenReturn(attributes);
 
-                return document;
-            }
-        }
-        TestCrawler crawler = new TestCrawler();
-        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
-        assertEquals(1, pages.get(0).getInternalUrls().size());
+        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
     }
 
+    @Test
+    public void doesNotAddQueryStringedUrlsWithQuestionMarkAndHashTwice() throws IOException {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://wiprodigital.com/what-we-do?value#=work-three-circles-row");
+        when(attributes2.get("href")).thenReturn("http://wiprodigital.com/what-we-do");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
+    }
+
+    @Test
+    public void doesNotAddQueryStringedUrlsWithQuestionMarkAndHashReversedTwice() throws IOException {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://wiprodigital.com/what-we-do#value?=work-three-circles-row");
+        when(attributes2.get("href")).thenReturn("http://wiprodigital.com/what-we-do");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
+    }
+
+    @Test
+    public void doesNotAddQueryStringedUrlsTwiceForExternalUrls() throws IOException {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://google.com/what-we-do#work-three-circles-row");
+        when(attributes2.get("href")).thenReturn("http://google.com/what-we-do");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getExternalUrls().size());
+    }
+
+    @Test
+    public void doesNotAddQueryStringedUrlsWithQuestionMarkTwiceExternalUrls() throws IOException {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://google.com/what-we-do?value=work-three-circles-row");
+        when(attributes2.get("href")).thenReturn("http://google.com/what-we-do");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getExternalUrls().size());
+    }
+
+    @Test
+    public void doesNotAddQueryStringedUrlsWithQuestionMarkAndHashTwiceExternalUrls() throws IOException {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://google.com/what-we-do?value#=work-three-circles-row");
+        when(attributes2.get("href")).thenReturn("http://google.com/what-we-do");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getExternalUrls().size());
+    }
+
+    @Test
+    public void doesNotAddQueryStringedUrlsWithQuestionMarkAndHashReversedTwiceExternalUrls() throws IOException {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://google.com/what-we-do#value?=work-three-circles-row");
+        when(attributes2.get("href")).thenReturn("http://google.com/what-we-do");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getExternalUrls().size());
+    }
 
 }
