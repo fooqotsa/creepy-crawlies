@@ -202,28 +202,6 @@ public class PageParserTest {
     }
 
     @Test
-    public void doesNotAddQueryStringedUrlsWithQuestionMarkTwice() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Element navElement2 = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        Attributes attributes2 = mock(Attributes.class);
-        elements.add(0, navElement);
-        elements.add(1, navElement2);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("href")).thenReturn("http://wiprodigital.com/what-we-do?value=work-three-circles-row");
-        when(attributes2.get("href")).thenReturn("http://wiprodigital.com/what-we-do");
-        when(navElement.attributes()).thenReturn(attributes);
-        when(navElement2.attributes()).thenReturn(attributes2);
-
-        assertEquals(1, new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().size());
-    }
-
-    @Test
     public void doesNotAddToListOfInternalUrlsIfUrlIsNull() throws IOException {
         Document document = mock(Document.class);
         Element topLevelElement = mock(Element.class);
