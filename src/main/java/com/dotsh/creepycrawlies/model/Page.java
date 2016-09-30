@@ -1,6 +1,5 @@
 package com.dotsh.creepycrawlies.model;
 
-import java.util.Dictionary;
 import java.util.Set;
 
 public class Page {
