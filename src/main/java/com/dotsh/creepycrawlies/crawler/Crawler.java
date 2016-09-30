@@ -21,7 +21,9 @@ public class Crawler {
         while (!queue.isEmpty()) {
             String href = queue.remove();
             Document document = documentRetriever.retrieve(href);
-            pages.add(parsePage());
+            if (document != null) {
+                pages.add(parsePage());
+            }
         }
         return pages;
     }

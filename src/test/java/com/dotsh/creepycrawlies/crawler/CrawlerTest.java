@@ -95,4 +95,17 @@ public class CrawlerTest {
         crawler.crawl(initialPage);
         verify(retriever, times(1)).retrieve("wiprodigital.com/stuff");
     }
+
+    @Test
+    public void crawlerDoesNotAddPageIfDocumentIsNull() throws IOException {
+        Crawler crawler = new Crawler();
+        crawler.setDocumentRetriever(retriever);
+        when(retriever.retrieve(any())).thenReturn(null);
+        Page initialPage = new Page();
+        HashSet<String> internalUrls = new HashSet<>();
+        internalUrls.add("wiprodigital.com/stuff");
+        initialPage.setInternalUrls(internalUrls);
+        List<Page> pages = crawler.crawl(initialPage);
+        assertEquals(1, pages.size());
+    }
 }
