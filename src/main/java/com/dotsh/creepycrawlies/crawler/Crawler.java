@@ -8,7 +8,9 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class Crawler {
 
@@ -26,6 +28,12 @@ public class Crawler {
 
     private String deriveHost(String url) throws MalformedURLException {
         return new HostDeriver().parse(url);
+    }
+
+    protected Queue<String> initialiseQueue(Page page) {
+        Queue<String> queue = new LinkedList<>();
+        queue.add("internalUrl");
+        return queue;
     }
 
     protected Document retrieveDocument (String url) throws IOException {

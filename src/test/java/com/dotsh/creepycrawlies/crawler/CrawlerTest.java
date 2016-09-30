@@ -1,14 +1,20 @@
 package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +53,24 @@ public class CrawlerTest {
         List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
         assertEquals(WIPRO_HOMEPAGE, pages.get(0).getUrl());
     }
+
+    @Test
+    public void crawlerAddsInternalUrlsFromInitialPageToQueueForProcessing() {
+        class TestCrawler extends Crawler {
+            public Queue<String> getInitialiseQueue(Page page) {
+                return initialiseQueue(page);
+            }
+        }
+        Page page = new Page();
+        HashSet<String> internalUrls = new HashSet<>();
+        internalUrls.add("internalUrl");
+
+        page.setInternalUrls(internalUrls);
+        TestCrawler crawler = new TestCrawler();
+        Queue<String> queue = crawler.getInitialiseQueue(page);
+        assertEquals(1, queue.size());
+    }
+
 
     @Ignore
     public void test() throws IOException {
