@@ -2,7 +2,10 @@ package com.dotsh.creepycrawlies.crawler;
 
 import com.dotsh.creepycrawlies.model.Page;
 import com.dotsh.creepycrawlies.retriever.DocumentRetriever;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.Queue;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -78,7 +82,7 @@ public class CrawlerTest {
         HashSet<String> internalUrls = new HashSet<>();
         internalUrls.add("wiprodigital.com");
         page.setInternalUrls(internalUrls);
-        List<Page> pages = crawler.crawl(page);
+        List<Page> pages = crawler.crawl(page, "");
         assertEquals(2, pages.size());
     }
 
@@ -92,7 +96,7 @@ public class CrawlerTest {
         HashSet<String> internalUrls = new HashSet<>();
         internalUrls.add("wiprodigital.com/stuff");
         initialPage.setInternalUrls(internalUrls);
-        crawler.crawl(initialPage);
+        crawler.crawl(initialPage, "");
         verify(retriever, times(1)).retrieve("wiprodigital.com/stuff");
     }
 
@@ -105,7 +109,80 @@ public class CrawlerTest {
         HashSet<String> internalUrls = new HashSet<>();
         internalUrls.add("wiprodigital.com/stuff");
         initialPage.setInternalUrls(internalUrls);
-        List<Page> pages = crawler.crawl(initialPage);
+        List<Page> pages = crawler.crawl(initialPage, "");
+        assertEquals(1, pages.size());
+    }
+
+    @Test
+    public void crawlerPassesDocumentToPageParse() throws IOException {
+        class TestCrawler extends Crawler {
+            public Document doc = null;
+
+            @Override
+            protected Page parsePage(Document document, String hostUrl) {
+                doc = document;
+                return new Page();
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        crawler.setDocumentRetriever(retriever);
+        Document document = new Document("");
+        when(retriever.retrieve(any())).thenReturn(document);
+        Page initialPage = new Page();
+        HashSet<String> internalUrls = new HashSet<>();
+        internalUrls.add("");
+        initialPage.setInternalUrls(internalUrls);
+        crawler.crawl(initialPage, "");
+        assertSame(document, crawler.doc);
+    }
+
+    @Test
+    public void crawlerPassesInHostUrlToParsePage() throws IOException {
+        class TestCrawler extends Crawler {
+            public String host = null;
+
+            @Override
+            protected Page parsePage(Document document, String hostUrl) {
+                host = hostUrl;
+                return new Page();
+            }
+        }
+        TestCrawler crawler = new TestCrawler();
+        crawler.setDocumentRetriever(retriever);
+        Document document = new Document("");
+        when(retriever.retrieve(any())).thenReturn(document);
+        Page initialPage = new Page();
+        HashSet<String> internalUrls = new HashSet<>();
+        internalUrls.add("");
+        initialPage.setInternalUrls(internalUrls);
+        crawler.crawl(initialPage, "hostUrl");
+        assertSame("hostUrl", crawler.host);
+    }
+
+    @Test
+    public void crawlerOnlyVisitsAPageOnce() throws IOException {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        elements.add(0, navElement);
+
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://wiprodigital.com/who-we-are");
+        when(navElement.attributes()).thenReturn(attributes);
+
+        Crawler crawler = new Crawler();
+        crawler.setDocumentRetriever(retriever);
+
+        when(retriever.retrieve(any())).thenReturn(document);
+        Page page = new Page();
+        page.setUrl("http://wiprodigital.com/who-we-are");
+        HashSet<String> internalUrls = new HashSet<>();
+        internalUrls.add("http://wiprodigital.com/who-we-are");
+        page.setInternalUrls(internalUrls);
+        List<Page> pages = crawler.crawl(page, "wiprodigital.com");
         assertEquals(1, pages.size());
     }
 }
