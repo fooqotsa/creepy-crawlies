@@ -202,23 +202,6 @@ public class PageParserTest {
     }
 
     @Test
-    public void doesNotAddToListOfInternalUrlsIfUrlIsNull() throws IOException {
-        Document document = mock(Document.class);
-        Element topLevelElement = mock(Element.class);
-        Element navElement = mock(Element.class);
-        Elements elements = new Elements();
-        Attributes attributes = mock(Attributes.class);
-        elements.add(0, navElement);
-
-        when(document.body()).thenReturn(topLevelElement);
-        when(topLevelElement.select(anyString())).thenReturn(elements);
-        when(attributes.get("href")).thenReturn(null);
-        when(navElement.attributes()).thenReturn(attributes);
-
-        assertTrue(new PageParser().buildFromDocument(document, HOST_URL).getInternalUrls().isEmpty());
-    }
-
-    @Test
     public void doesNotAddToListOfInternalUrlsIfUrlIsEmpty() throws IOException {
         Document document = mock(Document.class);
         Element topLevelElement = mock(Element.class);
