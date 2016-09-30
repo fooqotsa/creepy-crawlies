@@ -53,30 +53,6 @@ public class CrawlerTest {
         assertEquals(WIPRO_HOMEPAGE, pages.get(0).getUrl());
     }
 
-    @Test
-    public void retrievesAListOfInternalUrlsOnCurrentPageAndAddsThemToPageObject() throws IOException {
-        class TestCrawler extends Crawler {
-            @Override
-            protected Document retrieveDocument(String url) {
-                Document document = mock(Document.class);
-                Element topLevelElement = mock(Element.class);
-                Element navElement = mock(Element.class);
-                Elements elements = new Elements();
-                Attributes attributes = mock(Attributes.class);
-                elements.add(0, navElement);
-
-                when(document.body()).thenReturn(topLevelElement);
-                when(topLevelElement.select(anyString())).thenReturn(elements);
-                when(attributes.get("href")).thenReturn("http://wiprodigital.com/who-we-are");
-                when(navElement.attributes()).thenReturn(attributes);
-
-                return document;
-            }
-        }
-        TestCrawler crawler = new TestCrawler();
-        List<Page> pages = crawler.connect(WIPRO_HOMEPAGE);
-        assertTrue(pages.get(0).getInternalUrls().contains("http://wiprodigital.com/who-we-are"));
-    }
 
     @Test
     public void doesNotAddToListOfInternalUrlsIfUrlIsNotAtSameDomain() throws IOException {
