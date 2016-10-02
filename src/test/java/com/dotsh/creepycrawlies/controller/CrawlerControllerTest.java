@@ -24,7 +24,7 @@ public class CrawlerControllerTest {
         }
         when(mockInitialiser.connect("http://wiprodigital.com")).thenReturn(new ArrayList<>());
         TestCrawlerController controller = new TestCrawlerController();
-        ModelAndView mav = controller.crawl("http://wiprodigital.com");
+        ModelAndView mav = controller.crawl();
         assertNotNull(mav);
     }
 
@@ -39,7 +39,7 @@ public class CrawlerControllerTest {
         }
         when(mockInitialiser.connect("http://wiprodigital.com")).thenReturn(new ArrayList<>());
         TestCrawlerController controller = new TestCrawlerController();
-        ModelAndView mav = controller.crawl("http://wiprodigital.com");
+        ModelAndView mav = controller.crawl();
         assertEquals("results", mav.getViewName());
     }
 
@@ -54,7 +54,7 @@ public class CrawlerControllerTest {
         }
         when(mockInitialiser.connect("http://wiprodigital.com")).thenReturn(new ArrayList<>());
         TestCrawlerController controller = new TestCrawlerController();
-        ModelAndView mav = controller.crawl("http://wiprodigital.com");
+        ModelAndView mav = controller.crawl();
         assertNotNull(mav.getModel().get("pages"));
     }
 
@@ -69,8 +69,8 @@ public class CrawlerControllerTest {
         }
 
         TestCrawlerController crawlerController = new TestCrawlerController();
-        crawlerController.crawl("");
-        verify(mockInitialiser, times(1)).connect("");
+        crawlerController.crawl();
+        verify(mockInitialiser, times(1)).connect("http://wiprodigital.com");
     }
 
     @Test
@@ -84,7 +84,7 @@ public class CrawlerControllerTest {
         }
         when(mockInitialiser.connect(anyString())).thenThrow(new IOException());
         TestCrawlerController crawlerController = new TestCrawlerController();
-        ModelAndView mav = crawlerController.crawl("herpderp");
+        ModelAndView mav = crawlerController.crawl();
         assertEquals("error", mav.getViewName());
     }
 }
