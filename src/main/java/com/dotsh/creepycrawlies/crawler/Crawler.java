@@ -22,8 +22,10 @@ public class Crawler {
             if (!alreadyVisited.contains(href)) {
                 Document document = documentRetriever.retrieve(href);
                 if (document != null) {
-                    pages.add(parsePage(document, hostUrl));
+                    Page page = parsePage(document, hostUrl);
+                    pages.add(page);
                     alreadyVisited.add(href);
+                    addInternalLinksToQueue(queue, alreadyVisited, page.getInternalUrls());
                 }
             }
         }
@@ -47,11 +49,11 @@ public class Crawler {
     }
 
     protected void addInternalLinksToQueue(Queue<String> queue, Set<String> alreadyVisited, Set<String> internalUrls) {
-        for (String url : internalUrls) {
-            if (!alreadyVisited.contains(url)) {
-                queue.add(url);
-            }
-        }
+        internalUrls.stream().filter(url -> hasNotBeenVisitedAndIsNotInQueue(queue, alreadyVisited, url)).forEach(queue::add);
+    }
+
+    private boolean hasNotBeenVisitedAndIsNotInQueue(Queue<String> queue, Set<String> alreadyVisited, String url) {
+        return !alreadyVisited.contains(url) && !queue.contains(url);
     }
 
     public void setDocumentRetriever(DocumentRetriever documentRetriever) {

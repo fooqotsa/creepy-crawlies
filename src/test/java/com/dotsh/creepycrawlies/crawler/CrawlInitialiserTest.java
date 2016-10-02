@@ -56,7 +56,8 @@ public class CrawlInitialiserTest {
 
     @Ignore
     public void test() throws IOException {
-        new CrawlInitialiser().connect(WIPRO_HOMEPAGE);
+        List<Page> pages = new CrawlInitialiser().connect(WIPRO_HOMEPAGE);
+        assertEquals(false, pages.isEmpty());
     }
 
 }

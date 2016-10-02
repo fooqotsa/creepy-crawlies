@@ -11,9 +11,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -249,4 +247,95 @@ public class CrawlerTest {
         assertEquals("testUrl3", queue.remove());
     }
 
+    @Test
+    public void doesNotAddToQueueIfQueueAlreadyContainsUrl() {
+        class TestCrawler extends Crawler {
+            public void parseQueue(Queue<String> queue, Set<String> alreadyVisited, Page page) {
+                addInternalLinksToQueue(queue, alreadyVisited, page.getInternalUrls());
+            }
+        }
+
+        TestCrawler crawler = new TestCrawler();
+        Queue<String> queue = new LinkedList<>();
+        queue.add("testUrl1");
+        Page page = new Page();
+        Set<String> internalUrls = new HashSet<>();
+        internalUrls.add("testUrl1");
+        Set<String> alreadyVisited = new HashSet<>();
+        page.setInternalUrls(internalUrls);
+        crawler.parseQueue(queue, alreadyVisited, page);
+
+        assertEquals(1, queue.size());
+    }
+
+    @Test
+    public void crawlerOnlyAddsUniquePagesToListOfPages() throws IOException {
+        Crawler crawler = new Crawler();
+
+        Document firstPage = firstPage();
+        when(retriever.retrieve("http://wiprodigital.com/2")).thenReturn(firstPage);
+        Document secondPage = secondPage();
+        when(retriever.retrieve("http://wiprodigital.com/3")).thenReturn(secondPage);
+        crawler.setDocumentRetriever(retriever);
+
+        Page page = new Page();
+        page.setUrl("http://wiprodigital.com");
+        Set<String> internalUrls = new HashSet<>();
+        internalUrls.add("http://wiprodigital.com/2");
+        internalUrls.add("http://wiprodigital.com");
+        internalUrls.add("http://wiprodigital.com/3");
+
+        page.setInternalUrls(internalUrls);
+        List<Page> pages = crawler.crawl(page, "wiprodigital.com");
+        List<String> visited = new ArrayList<>();
+        assertEquals(3, pages.size());
+        for (Page newPage : pages) {
+            assertFalse(visited.contains(newPage.getUrl()));
+            visited.add(newPage.getUrl());
+        }
+    }
+
+    private Document firstPage() {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.location()).thenReturn("http://wiprodigital.com/2");
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://wiprodigital.com");
+        when(attributes2.get("href")).thenReturn("http://wiprodigital.com/3");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        return document;
+    }
+
+    private Document secondPage() {
+        Document document = mock(Document.class);
+        Element topLevelElement = mock(Element.class);
+        Element navElement = mock(Element.class);
+        Element navElement2 = mock(Element.class);
+        Elements elements = new Elements();
+        Attributes attributes = mock(Attributes.class);
+        Attributes attributes2 = mock(Attributes.class);
+        elements.add(0, navElement);
+        elements.add(1, navElement2);
+
+        when(document.location()).thenReturn("http://wiprodigital.com/3");
+        when(document.body()).thenReturn(topLevelElement);
+        when(topLevelElement.select(anyString())).thenReturn(elements);
+        when(attributes.get("href")).thenReturn("http://wiprodigital.com");
+        when(attributes2.get("href")).thenReturn("http://wiprodigital.com/2");
+        when(navElement.attributes()).thenReturn(attributes);
+        when(navElement2.attributes()).thenReturn(attributes2);
+
+        return document;
+    }
 }
