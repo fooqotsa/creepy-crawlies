@@ -18,7 +18,7 @@ public class QueryParamParser {
     }
 
     private String stripOutHash(String href) {
-        if (href.contains(HASH_QUERY_STRING)) {
+        if (!href.startsWith(HASH_QUERY_STRING) && href.contains(HASH_QUERY_STRING)) {
             href = href.split(HASH_QUERY_STRING)[URL_FIRST_SECTION];
         }
         return href;

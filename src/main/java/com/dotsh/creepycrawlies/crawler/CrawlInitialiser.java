@@ -19,16 +19,23 @@ public class CrawlInitialiser {
 
     private List<Page> buildPages(Document doc, String host) throws IOException {
         List<Page> pages = new ArrayList<>();
-        pages.add(new PageParser().buildFromDocument(doc, host));
+        pages.addAll(initialiseCrawler().crawl(retrieveInitialPage(doc, host), host));
         return pages;
+    }
+
+    private Page retrieveInitialPage(Document doc, String host) {
+        return new PageParser().buildFromDocument(doc, host);
     }
 
     private String deriveHost(String url) throws MalformedURLException {
         return new HostDeriver().parse(url);
     }
 
-    protected Document retrieveDocument (String url) throws IOException {
+    protected Document retrieveDocument(String url) throws IOException {
         return new DocumentRetriever().retrieve(url);
     }
 
+    protected Crawler initialiseCrawler() {
+        return new Crawler();
+    }
 }

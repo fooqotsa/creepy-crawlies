@@ -10,8 +10,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class CrawlInitialiserTest {
 
@@ -54,10 +53,25 @@ public class CrawlInitialiserTest {
         assertTrue(new CrawlInitialiser().connect("url").isEmpty());
     }
 
-    @Ignore
-    public void test() throws IOException {
-        List<Page> pages = new CrawlInitialiser().connect(WIPRO_HOMEPAGE);
-        assertEquals(false, pages.isEmpty());
+    @Test
+    public void afterInitialPageIsParsedCrawlerIsCalledToRecursivelyCrawlThroughInternalUrls() throws IOException {
+        Crawler mockCrawler = mock(Crawler.class);
+        class TestCrawlerInitialiser extends CrawlInitialiser {
+            @Override
+            protected Crawler initialiseCrawler() {
+                return mockCrawler;
+            }
+
+            @Override
+            protected Document retrieveDocument (String url) {
+                Document document = mock(Document.class);
+                when(document.location()).thenReturn(WIPRO_HOMEPAGE);
+                return document;
+            }
+        }
+        TestCrawlerInitialiser crawlerInitialiser = new TestCrawlerInitialiser();
+        crawlerInitialiser.connect(WIPRO_HOMEPAGE);
+        verify(mockCrawler, times(1)).crawl(any(), any());
     }
 
 }

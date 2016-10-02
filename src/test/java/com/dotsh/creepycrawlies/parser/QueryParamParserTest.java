@@ -60,4 +60,10 @@ public class QueryParamParserTest {
 
         assertEquals(expectedResult, paramParser.stripUrlIfQueryParametersArePresent(expectedResult));
     }
+
+    @Test
+    public void ifUrlStartsWithHashThenDontAttemptToParse() {
+        String urlWithHashPrefix = "#anchor";
+        assertEquals(urlWithHashPrefix, paramParser.stripUrlIfQueryParametersArePresent(urlWithHashPrefix));
+    }
 }
