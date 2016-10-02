@@ -4,6 +4,7 @@
 This is a typical springboot application
 1. ./gradlew clean build
 2. ./gradlew bootRun
+3. go to http://localhost:8080 - this will start the crawling process
 
 ## Tech choices
 
@@ -40,4 +41,20 @@ was a fair trade-off to stop from having field level objects in the classes for 
 
 My approach was to build out the core logic for parsing a single page first,
 creating a single class called Crawler, and then subsequently pulling that logic out in to separate smaller classes once the
-roles & responsibilities of each method became clearer and then refactoring the tests to sit in the test class p
+roles & responsibilities of each method became clearer and then refactoring the tests to sit in the test class that coincides
+with the production class. This is a small byproduct of TDD but the benefits far outweigh any disadvantages here.
+
+## Integration Tests
+
+Integration tests are light here, the reason for this is that the url to process is fixed and mocking the
+underlying code that's calling in to JSoup would requiring autowiring mock singletons which I decided to stay away from.
+Another possibility is to have a mock server spin up for the creepy crawler to parse but felt this was outwith the scope of this
+demo.
+
+## Future considerations
+
+1. Currently the code will only process one document at a time. A quick way to process the pages would be to spawn off multiple
+threads which would take a url from the queue, grab the document, parse the page and then add that result into the list of pages
+which would be synchronised.
+
+2. Possibility of adhering to robots.txt to ensure I don't get blocked from websites!
