@@ -9,12 +9,11 @@ import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -185,4 +184,27 @@ public class CrawlerTest {
         List<Page> pages = crawler.crawl(page, "wiprodigital.com");
         assertEquals(1, pages.size());
     }
+
+    @Test
+    public void ifParsedPageHasInternalRefThatHasAlreadyBeenVisitedThenItDoesNotJoinTheQueue() {
+        class TestCrawler extends Crawler {
+            public void parseQueue(Queue<String> queue, Set<String> alreadyVisited, Page page) {
+                addInternalLinksToQueue(queue, alreadyVisited, page.getInternalUrls());
+            }
+        }
+
+        TestCrawler crawler = new TestCrawler();
+        Queue<String> queue = new LinkedList<>();
+        Page page = new Page();
+        Set<String> internalUrls = new HashSet<>();
+        Set<String> alreadyVisited = new HashSet<>();
+        alreadyVisited.add("http://wiprodigital.com/1");
+        internalUrls.add("http://wiprodigital.com/1");
+        internalUrls.add("http://wiprodigital.com/2");
+        page.setInternalUrls(internalUrls);
+        crawler.parseQueue(queue, alreadyVisited, page);
+
+        assertTrue(queue.contains("http://wiprodigital.com/2"));
+    }
+
 }

@@ -14,8 +14,7 @@ public class Crawler {
 
     public List<Page> crawl(Page initialPage, String hostUrl) throws IOException {
         Queue<String> queue = initialiseQueue(initialPage);
-        Set<String> alreadyVisited = new HashSet<>();
-        alreadyVisited.add(initialPage.getUrl());
+        Set<String> alreadyVisited = initialiseAlreadyVisitedSet(initialPage);
         List<Page> pages = new ArrayList<>();
         pages.add(initialPage);
         while (!queue.isEmpty()) {
@@ -31,6 +30,12 @@ public class Crawler {
         return pages;
     }
 
+    protected Set<String> initialiseAlreadyVisitedSet(Page initialPage) {
+        Set<String> alreadyVisited = new HashSet<>();
+        alreadyVisited.add(initialPage.getUrl());
+        return alreadyVisited;
+    }
+
     protected Page parsePage(Document document, String hostUrl) {
         return new PageParser().buildFromDocument(document, hostUrl);
     }
@@ -39,6 +44,10 @@ public class Crawler {
         Queue<String> queue = new LinkedList<>();
         queue.addAll(page.getInternalUrls());
         return queue;
+    }
+
+    protected void addInternalLinksToQueue(Queue<String> queue, Set<String> alreadyVisited, Set<String> internalUrls) {
+        queue.add("http://wiprodigital.com/2");
     }
 
     public void setDocumentRetriever(DocumentRetriever documentRetriever) {
