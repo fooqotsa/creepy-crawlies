@@ -118,7 +118,9 @@ public class CrawlerTest {
             @Override
             protected Page parsePage(Document document, String hostUrl) {
                 doc = document;
-                return new Page();
+                Page page = new Page();
+                page.setInternalUrls(new HashSet<>());
+                return page;
             }
         }
         TestCrawler crawler = new TestCrawler();
@@ -141,7 +143,9 @@ public class CrawlerTest {
             @Override
             protected Page parsePage(Document document, String hostUrl) {
                 host = hostUrl;
-                return new Page();
+                Page page = new Page();
+                page.setInternalUrls(new HashSet<>());
+                return page;
             }
         }
         TestCrawler crawler = new TestCrawler();

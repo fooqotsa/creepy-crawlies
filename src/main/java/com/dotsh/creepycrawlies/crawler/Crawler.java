@@ -17,19 +17,31 @@ public class Crawler {
         Set<String> alreadyVisited = initialiseAlreadyVisitedSet(initialPage);
         List<Page> pages = new ArrayList<>();
         pages.add(initialPage);
-        while (!queue.isEmpty()) {
-            String href = queue.remove();
-            if (!alreadyVisited.contains(href)) {
-                Document document = documentRetriever.retrieve(href);
-                if (document != null) {
-                    Page page = parsePage(document, hostUrl);
-                    pages.add(page);
-                    alreadyVisited.add(href);
-                    addInternalLinksToQueue(queue, alreadyVisited, page.getInternalUrls());
-                }
-            }
-        }
+        retrievePagesUntilAllInteralPagesParsed(hostUrl, queue, alreadyVisited, pages);
         return pages;
+    }
+
+    protected void retrievePagesUntilAllInteralPagesParsed(String hostUrl, Queue<String> queue, Set<String> alreadyVisited, List<Page> pages) throws IOException {
+        while (!queue.isEmpty()) {
+            retrieveAndParsePages(hostUrl, queue, alreadyVisited, pages);
+        }
+    }
+
+    private void retrieveAndParsePages(String hostUrl, Queue<String> queue, Set<String> alreadyVisited, List<Page> pages) throws IOException {
+        String href = queue.remove();
+        if (!alreadyVisited.contains(href)) {
+            Document document = documentRetriever.retrieve(href);
+            parseDocument(hostUrl, queue, alreadyVisited, pages, href, document);
+        }
+    }
+
+    private void parseDocument(String hostUrl, Queue<String> queue, Set<String> alreadyVisited, List<Page> pages, String href, Document document) {
+        if (document != null) {
+            final Page page = parsePage(document, hostUrl);
+            pages.add(page);
+            alreadyVisited.add(href);
+            addInternalLinksToQueue(queue, alreadyVisited, page.getInternalUrls());
+        }
     }
 
     protected Set<String> initialiseAlreadyVisitedSet(Page initialPage) {
