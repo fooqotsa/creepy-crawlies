@@ -14,15 +14,24 @@ public class PageParser {
     private UrlParser urlParser = new UrlParser();
 
     public Page buildFromDocument(Document doc, String url) {
+        Page page = initialisePage(doc);
+        final Elements hrefElements = getAllElementsWithHrefs(doc);
+        final Elements staticContentElements = getAllElementsWithStaticContent(doc);
+        parsePageContent(url, page, hrefElements, staticContentElements);
+        return page;
+    }
+
+    private Page initialisePage(Document doc) {
         Page page = new Page();
         page.setTitle(doc.title());
         page.setUrl(doc.location());
-        Elements hrefElements = getAllElementsWithHrefs(doc);
-        Elements staticContentElements = getAllElementsWithStaticContent(doc);
+        return page;
+    }
+
+    private void parsePageContent(String url, Page page, Elements hrefElements, Elements staticContentElements) {
         page.setInternalUrls(parseInternalUrls(hrefElements, url));
         page.setExternalUrls(parseExternalUrls(hrefElements, url));
         page.setStaticContent(parseStaticContent(staticContentElements));
-        return page;
     }
 
     private Set<String> parseInternalUrls(Elements hrefElements, String url) {
