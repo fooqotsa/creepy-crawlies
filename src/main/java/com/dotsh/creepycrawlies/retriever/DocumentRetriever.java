@@ -3,10 +3,14 @@ package com.dotsh.creepycrawlies.retriever;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class DocumentRetriever {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentRetriever.class);
 
     public Document retrieve(String url) throws IOException {
         try {
@@ -18,7 +22,7 @@ public class DocumentRetriever {
     }
 
     protected void handleException(String url, Exception e) {
-        System.out.println("dud url " + e.getLocalizedMessage());
-        System.out.println("dud url = " + url);
+        LOGGER.warn("dud url " + e.getLocalizedMessage());
+        LOGGER.warn("dud url = " + url);
     }
 }

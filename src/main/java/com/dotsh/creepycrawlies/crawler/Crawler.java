@@ -4,6 +4,8 @@ import com.dotsh.creepycrawlies.model.Page;
 import com.dotsh.creepycrawlies.parser.PageParser;
 import com.dotsh.creepycrawlies.retriever.DocumentRetriever;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -11,6 +13,7 @@ import java.util.*;
 public class Crawler {
 
     private DocumentRetriever documentRetriever = new DocumentRetriever();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Crawler.class);
 
     public List<Page> crawl(Page initialPage, String hostUrl) throws IOException {
         Queue<String> queue = initialiseQueue(initialPage);
@@ -30,6 +33,7 @@ public class Crawler {
     private void retrieveAndParsePages(String hostUrl, Queue<String> queue, Set<String> alreadyVisited, List<Page> pages) throws IOException {
         String href = queue.remove();
         if (!alreadyVisited.contains(href)) {
+            LOGGER.debug("retrieving " + href + " for parsing");
             Document document = documentRetriever.retrieve(href);
             parseDocument(hostUrl, queue, alreadyVisited, pages, href, document);
         }
