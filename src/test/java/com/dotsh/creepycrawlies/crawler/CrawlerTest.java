@@ -204,7 +204,49 @@ public class CrawlerTest {
         page.setInternalUrls(internalUrls);
         crawler.parseQueue(queue, alreadyVisited, page);
 
-        assertTrue(queue.contains("http://wiprodigital.com/2"));
+        assertTrue(!queue.contains("http://wiprodigital.com/1"));
+    }
+
+    @Test
+    public void doesNotAddToQueueIfPageInternalUrlsIsEmpty() {
+        class TestCrawler extends Crawler {
+            public void parseQueue(Queue<String> queue, Set<String> alreadyVisited, Page page) {
+                addInternalLinksToQueue(queue, alreadyVisited, page.getInternalUrls());
+            }
+        }
+
+        TestCrawler crawler = new TestCrawler();
+        Queue<String> queue = new LinkedList<>();
+        Page page = new Page();
+        Set<String> internalUrls = new HashSet<>();
+        Set<String> alreadyVisited = new HashSet<>();
+        page.setInternalUrls(internalUrls);
+        crawler.parseQueue(queue, alreadyVisited, page);
+
+        assertTrue(queue.isEmpty());
+    }
+
+    @Test
+    public void addsMultipleUrlsToQueueThatAreNotAlreadyVisited() {
+        class TestCrawler extends Crawler {
+            public void parseQueue(Queue<String> queue, Set<String> alreadyVisited, Page page) {
+                addInternalLinksToQueue(queue, alreadyVisited, page.getInternalUrls());
+            }
+        }
+
+        TestCrawler crawler = new TestCrawler();
+        Queue<String> queue = new LinkedList<>();
+        Page page = new Page();
+        Set<String> internalUrls = new HashSet<>();
+        internalUrls.add("testUrl1");
+        internalUrls.add("testUrl2");
+        internalUrls.add("testUrl3");
+        Set<String> alreadyVisited = new HashSet<>();
+        page.setInternalUrls(internalUrls);
+        crawler.parseQueue(queue, alreadyVisited, page);
+
+        assertEquals(3, queue.size());
+        assertEquals("testUrl3", queue.remove());
     }
 
 }

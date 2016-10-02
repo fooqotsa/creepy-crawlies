@@ -47,7 +47,11 @@ public class Crawler {
     }
 
     protected void addInternalLinksToQueue(Queue<String> queue, Set<String> alreadyVisited, Set<String> internalUrls) {
-        queue.add("http://wiprodigital.com/2");
+        for (String url : internalUrls) {
+            if (!alreadyVisited.contains(url)) {
+                queue.add(url);
+            }
+        }
     }
 
     public void setDocumentRetriever(DocumentRetriever documentRetriever) {
