@@ -1,14 +1,28 @@
 package com.dotsh.creepycrawlies.controller;
 
 import com.dotsh.creepycrawlies.crawler.CrawlInitialiser;
-import com.dotsh.creepycrawlies.model.Page;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
-import java.util.List;
 
 public class CrawlerController {
-    public List<Page> crawl(String website) throws IOException {
-        return getCrawlInitialiser().connect(website);
+
+    public static final String PAGES_KEY = "pages";
+    public static final String RESULTS_PAGE = "results";
+    public static final String ERROR_PAGE = "error";
+
+    public ModelAndView crawl(String website) {
+        final ModelAndView mav = new ModelAndView();
+        try {
+            mav.setViewName(RESULTS_PAGE);
+            mav.addObject(PAGES_KEY, getCrawlInitialiser().connect(website));
+            return mav;
+        } catch (IOException e) {
+            System.out.println("Crawler failed: " + e.getLocalizedMessage());
+            System.out.println("returning error page");
+            mav.setViewName(ERROR_PAGE);
+        }
+        return mav;
     }
 
     protected CrawlInitialiser getCrawlInitialiser() {

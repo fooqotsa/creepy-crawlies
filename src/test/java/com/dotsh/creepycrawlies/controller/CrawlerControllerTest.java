@@ -1,20 +1,20 @@
 package com.dotsh.creepycrawlies.controller;
 
 import com.dotsh.creepycrawlies.crawler.CrawlInitialiser;
-import com.dotsh.creepycrawlies.model.Page;
 import org.junit.Test;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 public class CrawlerControllerTest {
 
     @Test
-    public void controllerReturnsListOfPagesFound() throws IOException {
+    public void controllerReturnsModelAndView() throws IOException {
         CrawlInitialiser mockInitialiser = mock(CrawlInitialiser.class);
         class TestCrawlerController extends CrawlerController {
             @Override
@@ -24,8 +24,38 @@ public class CrawlerControllerTest {
         }
         when(mockInitialiser.connect("http://wiprodigital.com")).thenReturn(new ArrayList<>());
         TestCrawlerController controller = new TestCrawlerController();
-        List<Page> pages = controller.crawl("http://wiprodigital.com");
-        assertNotNull(pages);
+        ModelAndView mav = controller.crawl("http://wiprodigital.com");
+        assertNotNull(mav);
+    }
+
+    @Test
+    public void controllerReturnsViewOfResultsIfSuccess() throws IOException {
+        CrawlInitialiser mockInitialiser = mock(CrawlInitialiser.class);
+        class TestCrawlerController extends CrawlerController {
+            @Override
+            protected CrawlInitialiser getCrawlInitialiser() {
+                return mockInitialiser;
+            }
+        }
+        when(mockInitialiser.connect("http://wiprodigital.com")).thenReturn(new ArrayList<>());
+        TestCrawlerController controller = new TestCrawlerController();
+        ModelAndView mav = controller.crawl("http://wiprodigital.com");
+        assertEquals("results", mav.getViewName());
+    }
+
+    @Test
+    public void controllerReturnsListOfPagesInsideModel() throws IOException {
+        CrawlInitialiser mockInitialiser = mock(CrawlInitialiser.class);
+        class TestCrawlerController extends CrawlerController {
+            @Override
+            protected CrawlInitialiser getCrawlInitialiser() {
+                return mockInitialiser;
+            }
+        }
+        when(mockInitialiser.connect("http://wiprodigital.com")).thenReturn(new ArrayList<>());
+        TestCrawlerController controller = new TestCrawlerController();
+        ModelAndView mav = controller.crawl("http://wiprodigital.com");
+        assertNotNull(mav.getModel().get("pages"));
     }
 
     @Test
@@ -41,5 +71,20 @@ public class CrawlerControllerTest {
         TestCrawlerController crawlerController = new TestCrawlerController();
         crawlerController.crawl("");
         verify(mockInitialiser, times(1)).connect("");
+    }
+
+    @Test
+    public void controllerReturnsErrorPageIfUnexpectecExceptionIsThrown() throws IOException {
+        CrawlInitialiser mockInitialiser = mock(CrawlInitialiser.class);
+        class TestCrawlerController extends CrawlerController {
+            @Override
+            protected CrawlInitialiser getCrawlInitialiser() {
+                return mockInitialiser;
+            }
+        }
+        when(mockInitialiser.connect(anyString())).thenThrow(new IOException());
+        TestCrawlerController crawlerController = new TestCrawlerController();
+        ModelAndView mav = crawlerController.crawl("herpderp");
+        assertEquals("error", mav.getViewName());
     }
 }
